@@ -4,8 +4,9 @@
 
 int main() {
 	struct vector * vector;
-	vector = vector_create(2);
-	vector->zero[1].data = 5;
+	vector = vector_generate();
+	vector_print(vector);
+	vector_bubbleSort(vector);
 	vector_print(vector);
 	vector_destroy(vector);
 	
