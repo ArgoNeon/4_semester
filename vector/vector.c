@@ -3,89 +3,169 @@
 
 #include "vector.h"
 
-struct vector * vector_create(int size) {
-	struct vector * vector = calloc(1, sizeof(struct vector));
-	struct node * node = calloc(size, sizeof(struct node));
-	vector->size = size;
-	vector->zero = node;
+struct vector {
+	data * arr;
+	size_t capacity;
+	size_t size;
+};
 
-	for (int i = 0; i < size; i++)
-		vector->zero[i].num = i;
+vector * vector_create_zero() {
+	vector * vector = malloc(sizeof(vector));
 
+	if (vector == NULL) 
+		exit(1);
+
+	vector->arr = NULL;
+	vector->capacity = 0;
+	vector->size = 0;
 	return vector;
 }
 
-void vector_destroy(struct vector * vector) {
-	free(vector->zero);
+vector * vector_create_empty(size_t capacity) {
+	vector * vector = malloc(sizeof(vector));
+	
+	if (vector == NULL)
+		exit(1);
+
+	vector->arr = malloc(sizeof(data) * capacity);
+
+	if (vector->arr == NULL)
+		exit(1);
+
+	vector->capacity = capacity;
+	vector->size = 0;
+	return vector;	
+};
+
+vector * vector_create_full(size_t capacity, size_t size, data * arr) {
+	if (size > capacity)
+		exit(1);
+
+	vector * vector = malloc(sizeof(vector));
+	
+	if (vector == NULL)
+		exit(1);
+
+	vector->arr = malloc(sizeof(data) * capacity);
+
+	if (vector->arr == NULL)
+		exit(1);
+
+	vector->capacity = capacity;
+	vector->size = size;
+
+	for (int i = 0; i < size; i++) {
+		vector->arr[i] = arr[i];
+	}
+	
+	return vector;
+};
+
+void vector_destroy(vector * vector) {
+	free(vector->arr);
 	free(vector);
+	vector = NULL;
 }
 
-void vector_print(struct vector * vector) {
+void vector_print(vector * vector) {
 	int i;
-	printf("size: %d\n", vector->size);
+	printf("capacity: %ld\nsize: %ld\n", vector->capacity, vector->size);
 
 	for (i = 0; i < vector->size; i++) {
-		printf("num  %d  data  %d\n", vector->zero[i].num, vector->zero[i].data);	
+		printf("num  %d  data  %d\n", i, vector->arr[i]);	
 	}
 }
 
-void vector_push(struct vector * vector, int pos, int inf) {
-	int size = vector->size + 1;
-	struct node * node = calloc(size, sizeof(struct node));
-	vector->size = size;
+int vector_extension(vector * vector) {
+	if (vector->capacity == 0)
+		vector->capacity = 1;
+	else
+		vector->capacity = vector->capacity * 2;
+	data * arr = malloc(sizeof(data) * vector->capacity);
 	
-	for (int i = 0; i < size; i++)
-		node[i].num = i;
+	if (arr == NULL)
+		return 1;
 
-	for (int i = 0; i < pos; i++) 
-		node[i].data = vector->zero[i].data;
+	for (int i = 0; i < vector->size; i++) 
+		arr[i] = vector->arr[i];
 
-	node[pos].data = inf;
-
-	for (int i = pos + 1; i < size; i++) 
-		node[i].data = vector->zero[i - 1].data;
-		
-	free(vector->zero);
-	vector->zero = node;
+	free(vector->arr);
+	vector->arr = arr;
+	return 0;
 }
 
-void vector_delete(struct vector * vector, int pos) {
-	int size = vector->size - 1;
-	vector->size = size;
-
-	for (int i = pos; i < size; i++) 
-		vector->zero[i].data = vector->zero[i + 1].data;
+void vector_push(vector * vector, int val) {
+	vector->size = vector->size + 1;
 	
-	vector->zero = realloc(vector->zero, size);
+	if (vector->size > vector->capacity)
+		vector_extension(vector);
+
+	vector->arr[vector->size - 1] = val;
 }
 
-void vector_swap(struct vector * vector, int pos1, int pos2) {
-	int swp = vector->zero[pos1].data;
-	vector->zero[pos1].data = vector->zero[pos2].data;
-	vector->zero[pos2].data = swp;
+void vector_delete(vector * vector, size_t pos) {
+	vector->size = vector->size - 1;
+
+	for (int i = pos; i < vector->size; i++) 
+		vector->arr[i] = vector->arr[i + 1];
 }
 
-struct vector * vector_generate() {
-	int size = rand() % 100 + 1;
-	struct vector * vector = calloc(1, sizeof(struct vector));
-	struct node * node = calloc(size, sizeof(struct node));
-	vector->size = size;
-	vector->zero = node;
+int vector_swap(vector * vector, size_t pos1, size_t pos2) {
+	if ((pos1 > vector->size) || (pos2 > vector->size))
+		return 1;
+
+	int swp = vector->arr[pos1];
+	vector->arr[pos1] = vector->arr[pos2];
+	vector->arr[pos2] = swp;
+	return 0;
+}
+
+size_t vector_get_size(vector * vector) {
+	size_t size = vector->size;
+	return size;
+}
+
+data vector_get_val(vector * vector, size_t i) {
+	if (i > vector->size)
+		exit(1);
 	
-	for (int i = 0; i < size; i++) {
-		vector->zero[i].num = i;
-		vector->zero[i].data = rand() % 1000 + 1;
+	return vector->arr[i];
+};
+
+int vector_set_val(vector * vector, size_t i, int val) {
+	if (i > vector->size)
+		exit(1);
+	
+	vector->arr[i] = val;
+	return 0;
+};
+
+
+vector * vector_generate() {
+	int capacity = rand() % 100 + 1;
+	vector * vector = malloc(sizeof(vector));
+	data * arr = malloc(sizeof(data) * capacity);
+	vector->capacity = capacity;
+	vector->size = capacity;
+	vector->arr = arr;
+	
+	for (int i = 0; i < vector->size; i++) {
+		vector->arr[i] = rand() % 1000 + 1;
 	}
 
 	return vector;
 }
 
-void vector_bubbleSort(struct vector * vector) {
+vector * vector_generate_size(size_t capacity) {
+	vector * vector = malloc(sizeof(vector));
+	data * arr = malloc(sizeof(data) * capacity);
+	vector->capacity = capacity;
+	vector->size = capacity;
+	vector->arr = arr;
 	
-	for (int i = 0; i < vector->size - 1; i++) {
-		for (int j = (vector->size - 1); j > i; j--) {
-			if (vector->zero[j].data < vector->zero[j - 1].data)
-				vector_swap(vector, j - 1, j);
-		}
+	for (int i = 0; i < vector->size; i++) {
+		vector->arr[i] = rand() % 1000 + 1;
 	}
+	
+	return vector;
 }

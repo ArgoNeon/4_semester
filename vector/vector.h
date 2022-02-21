@@ -1,22 +1,28 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
-struct node{
-	int num;
-	int data;
-};
+#include <stdio.h>
 
-struct vector {
-	int size;
-	struct node * zero;
-};
+typedef int data;
 
-struct vector * vector_create(int size);
-void vector_destroy(struct vector * vector);
-void vector_print (struct vector * vector);
-struct vector * vector_generate();
-void vector_push(struct vector * vector, int pos, int inf);
-void vector_delete(struct vector * vector, int pos);
-void vector_bubbleSort(struct vector * vector);
+struct vector;
+
+typedef struct vector vector;
+
+vector * vector_create_zero();
+vector * vector_create_empty(size_t capacity);
+vector * vector_create_full(size_t capacity, size_t size, data * data);
+void vector_destroy(vector * vector);
+
+void vector_print (vector * vector);
+vector * vector_generate();
+vector * vector_generate_size(size_t capacity);
+
+void vector_push(vector * vector, int val);
+void vector_delete(vector * vector, size_t pos);
+int vector_swap(vector * vector, size_t pos1, size_t pos2);
+size_t vector_get_size(vector * vector);
+data vector_get_val(vector * vector, size_t i);
+int vector_set_val(vector * vector, size_t i, int val);
 
 #endif // VECTOR_H
