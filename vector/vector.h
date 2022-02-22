@@ -18,11 +18,11 @@ void vector_print (vector * vector);
 vector * vector_generate();
 vector * vector_generate_size(size_t capacity);
 
-void vector_push(vector * vector, int val);
+int vector_push(vector * vector, int val);
 void vector_delete(vector * vector, size_t pos);
 int vector_swap(vector * vector, size_t pos1, size_t pos2);
 size_t vector_get_size(vector * vector);
-data vector_get_val(vector * vector, size_t i);
+data vector_get_val(vector * vector, size_t i, int * flag);
 int vector_set_val(vector * vector, size_t i, int val);
 
 #endif // VECTOR_H

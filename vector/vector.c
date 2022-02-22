@@ -13,7 +13,7 @@ vector * vector_create_zero() {
 	vector * vector = malloc(sizeof(vector));
 
 	if (vector == NULL) 
-		exit(1);
+		return NULL;
 
 	vector->arr = NULL;
 	vector->capacity = 0;
@@ -25,12 +25,14 @@ vector * vector_create_empty(size_t capacity) {
 	vector * vector = malloc(sizeof(vector));
 	
 	if (vector == NULL)
-		exit(1);
+		return NULL;
 
 	vector->arr = malloc(sizeof(data) * capacity);
 
-	if (vector->arr == NULL)
-		exit(1);
+	if (vector->arr == NULL) {
+		free(vector);
+		return NULL;
+	}
 
 	vector->capacity = capacity;
 	vector->size = 0;
@@ -39,17 +41,19 @@ vector * vector_create_empty(size_t capacity) {
 
 vector * vector_create_full(size_t capacity, size_t size, data * arr) {
 	if (size > capacity)
-		exit(1);
+		return NULL;
 
 	vector * vector = malloc(sizeof(vector));
 	
 	if (vector == NULL)
-		exit(1);
+		return NULL;
 
 	vector->arr = malloc(sizeof(data) * capacity);
 
-	if (vector->arr == NULL)
-		exit(1);
+	if (vector->arr == NULL) {
+		free(vector);
+		return NULL;
+	}
 
 	vector->capacity = capacity;
 	vector->size = size;
@@ -94,13 +98,15 @@ int vector_extension(vector * vector) {
 	return 0;
 }
 
-void vector_push(vector * vector, int val) {
+int vector_push(vector * vector, int val) {
 	vector->size = vector->size + 1;
 	
 	if (vector->size > vector->capacity)
-		vector_extension(vector);
+		if (vector_extension(vector) == 1)
+			return 1;
 
 	vector->arr[vector->size - 1] = val;
+	return 0;
 }
 
 void vector_delete(vector * vector, size_t pos) {
@@ -125,16 +131,19 @@ size_t vector_get_size(vector * vector) {
 	return size;
 }
 
-data vector_get_val(vector * vector, size_t i) {
-	if (i > vector->size)
-		exit(1);
-	
+data vector_get_val(vector * vector, size_t i, int * flag) {
+	if (i > vector->size) {
+		* flag = 1;
+		return 0;
+	}
+
+	* flag = 0;
 	return vector->arr[i];
 };
 
 int vector_set_val(vector * vector, size_t i, int val) {
 	if (i > vector->size)
-		exit(1);
+		return 1;
 	
 	vector->arr[i] = val;
 	return 0;
@@ -144,7 +153,17 @@ int vector_set_val(vector * vector, size_t i, int val) {
 vector * vector_generate() {
 	int capacity = rand() % 100 + 1;
 	vector * vector = malloc(sizeof(vector));
+	
+	if (vector == NULL)
+		return NULL;
+
 	data * arr = malloc(sizeof(data) * capacity);
+
+	if (arr == NULL) {
+		free(vector);
+		return NULL;
+	}
+
 	vector->capacity = capacity;
 	vector->size = capacity;
 	vector->arr = arr;
@@ -158,7 +177,17 @@ vector * vector_generate() {
 
 vector * vector_generate_size(size_t capacity) {
 	vector * vector = malloc(sizeof(vector));
+
+	if (vector == NULL)
+		return NULL;
+
 	data * arr = malloc(sizeof(data) * capacity);
+
+	if (arr == NULL) {
+		free(vector);
+		return NULL;
+	}
+
 	vector->capacity = capacity;
 	vector->size = capacity;
 	vector->arr = arr;
