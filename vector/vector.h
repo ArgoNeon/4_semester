@@ -5,24 +5,26 @@
 
 typedef int data;
 
-struct vector;
+struct container;
 
-typedef struct vector vector;
+typedef struct table{
+	void (* destroy)(struct container * cont);
+	void (* print)(struct container * cont);
+	int (* push)(struct container * cont, int val);
+	void (* delet)(struct container * cont, size_t pos);
+	int (* swap)(struct container * cont, size_t pos1, size_t pos2);
+	size_t (* get_size)(struct container * cont);
+	data (* get_val)(struct container * cont, size_t i, int * flag);
+	int (* set_val)(struct container * cont, size_t i, int val);
+} table;
 
-vector * vector_create_zero();
-vector * vector_create_empty(size_t capacity);
-vector * vector_create_full(size_t capacity, size_t size, data * data);
-void vector_destroy(vector * vector);
+typedef struct container {
+	table * m;
+} container;
 
-void vector_print (vector * vector);
-vector * vector_generate();
-vector * vector_generate_size(size_t capacity);
-
-int vector_push(vector * vector, int val);
-void vector_delete(vector * vector, size_t pos);
-int vector_swap(vector * vector, size_t pos1, size_t pos2);
-size_t vector_get_size(vector * vector);
-data vector_get_val(vector * vector, size_t i, int * flag);
-int vector_set_val(vector * vector, size_t i, int val);
+container * vector_create_zero();
+container * vector_create_empty(size_t capacity);
+container * vector_create_full(size_t capacity, size_t size, data * data);
+container * vector_generate(size_t capacity);
 
 #endif // VECTOR_H

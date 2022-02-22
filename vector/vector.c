@@ -3,198 +3,269 @@
 
 #include "vector.h"
 
-struct vector {
+typedef struct vector {
 	data * arr;
 	size_t capacity;
 	size_t size;
-};
+} vector;
 
-vector * vector_create_zero() {
-	vector * vector = malloc(sizeof(vector));
+void vector_destroy(container * cont);
+void vector_print (container * cont);
+int vector_push(container * cont, int val);
+void vector_delet(container * cont, size_t pos);
+int vector_swap(container * cont, size_t pos1, size_t pos2);
+size_t vector_get_size(container * cont);
+data vector_get_val(container * cont, size_t i, int * flag);
+int vector_set_val(container * cont, size_t i, int val);
 
-	if (vector == NULL) 
+container * vector_create_zero() {
+	container * cont = malloc(sizeof(container) + sizeof(vector));
+
+	if (cont == NULL) 
 		return NULL;
-
-	vector->arr = NULL;
-	vector->capacity = 0;
-	vector->size = 0;
-	return vector;
-}
-
-vector * vector_create_empty(size_t capacity) {
-	vector * vector = malloc(sizeof(vector));
 	
-	if (vector == NULL)
-		return NULL;
-
-	vector->arr = malloc(sizeof(data) * capacity);
-
-	if (vector->arr == NULL) {
-		free(vector);
+	cont->m = malloc(sizeof(table));
+	
+	if (cont->m == NULL) {
+		free(cont);
 		return NULL;
 	}
 
-	vector->capacity = capacity;
-	vector->size = 0;
-	return vector;	
-};
+	vector * vect = (vector *)(cont + 1);
 
-vector * vector_create_full(size_t capacity, size_t size, data * arr) {
+	vect->arr = NULL;
+	cont->m->destroy = &vector_destroy;
+	cont->m->print = &vector_print;
+	cont->m->push = &vector_push;
+	cont->m->delet = &vector_delet;
+	cont->m->swap = &vector_swap;
+	cont->m->get_size = &vector_get_size;
+	cont->m->get_val = &vector_get_val;
+	cont->m->set_val = &vector_set_val;
+	vect->capacity = 0;
+	vect->size = 0;
+	return cont;
+}
+
+container * vector_create_empty(size_t capacity) {
+	container * cont = malloc(sizeof(container) + sizeof(vector));
+	
+	if (cont == NULL)
+		return NULL;
+
+	cont->m = malloc(sizeof(table));
+
+	if (cont->m == NULL) {
+		free(cont);
+		return NULL;
+	}
+
+	vector * vect = (vector *)(cont + 1);
+
+	vect->arr = malloc(sizeof(data) * capacity);
+
+	if (vect->arr == NULL) {
+		free(cont->m);
+		free(cont);
+		return NULL;
+	}
+
+	cont->m->destroy = &vector_destroy;
+	cont->m->print = &vector_print;
+	cont->m->push = &vector_push;
+	cont->m->delet = &vector_delet;
+	cont->m->swap = &vector_swap;
+	cont->m->get_size = &vector_get_size;
+	cont->m->get_val = &vector_get_val;
+	cont->m->set_val = &vector_set_val;
+	vect->capacity = capacity;
+	vect->size = 0;
+	return cont;	
+}
+
+container * vector_create_full(size_t capacity, size_t size, data * arr) {
 	if (size > capacity)
 		return NULL;
 
-	vector * vector = malloc(sizeof(vector));
+	container * cont = malloc(sizeof(container) + sizeof(vector));
 	
-	if (vector == NULL)
+	if (cont == NULL)
 		return NULL;
 
-	vector->arr = malloc(sizeof(data) * capacity);
+	cont->m = malloc(sizeof(table));
 
-	if (vector->arr == NULL) {
-		free(vector);
+	if (cont->m == NULL) {
+		free(cont);
 		return NULL;
 	}
 
-	vector->capacity = capacity;
-	vector->size = size;
+	vector * vect = (vector *)(cont + 1);
+
+	vect->arr = malloc(sizeof(data) * capacity);
+
+	if (vect->arr == NULL) {
+		free(cont->m);
+		free(cont);
+		return NULL;
+	}
+
+	cont->m->destroy = &vector_destroy;
+	cont->m->print = &vector_print;
+	cont->m->push = &vector_push;
+	cont->m->delet = &vector_delet;
+	cont->m->swap = &vector_swap;
+	cont->m->get_size = &vector_get_size;
+	cont->m->get_val = &vector_get_val;
+	cont->m->set_val = &vector_set_val;
+	vect->capacity = capacity;
+	vect->size = size;
 
 	for (int i = 0; i < size; i++) {
-		vector->arr[i] = arr[i];
+		vect->arr[i] = arr[i];
 	}
 	
-	return vector;
-};
-
-void vector_destroy(vector * vector) {
-	free(vector->arr);
-	free(vector);
-	vector = NULL;
+	return cont;
 }
 
-void vector_print(vector * vector) {
-	int i;
-	printf("capacity: %ld\nsize: %ld\n", vector->capacity, vector->size);
+void vector_destroy(container * cont) {
+	vector * vect = (vector *)(cont + 1);
 
-	for (i = 0; i < vector->size; i++) {
-		printf("num  %d  data  %d\n", i, vector->arr[i]);	
+	free(vect->arr);
+	free(cont);
+	vect = NULL;
+}
+
+void vector_print(container * cont) {
+	int i;
+	vector * vect = (vector *)(cont + 1);
+
+	printf("capacity: %ld\nsize: %ld\n", vect->capacity, vect->size);
+
+	for (i = 0; i < vect->size; i++) {
+		printf("num  %d  data  %d\n", i, vect->arr[i]);	
 	}
 }
 
-int vector_extension(vector * vector) {
-	if (vector->capacity == 0)
-		vector->capacity = 1;
+int vector_extension(container * cont) {
+	vector * vect = (vector *)(cont + 1);
+	
+	if (vect->capacity == 0)
+		vect->capacity = 1;
 	else
-		vector->capacity = vector->capacity * 2;
-	data * arr = malloc(sizeof(data) * vector->capacity);
+		vect->capacity = vect->capacity * 2;
+	data * arr = malloc(sizeof(data) * vect->capacity);
 	
 	if (arr == NULL)
 		return 1;
 
-	for (int i = 0; i < vector->size; i++) 
-		arr[i] = vector->arr[i];
+	for (int i = 0; i < vect->size; i++) 
+		arr[i] = vect->arr[i];
 
-	free(vector->arr);
-	vector->arr = arr;
+	free(vect->arr);
+	vect->arr = arr;
 	return 0;
 }
 
-int vector_push(vector * vector, int val) {
-	vector->size = vector->size + 1;
+int vector_push(container * cont, int val) {
+	vector * vect = (vector *)(cont + 1);
+
+	vect->size = vect->size + 1;
 	
-	if (vector->size > vector->capacity)
-		if (vector_extension(vector) == 1)
+	if (vect->size > vect->capacity)
+		if (vector_extension(cont) == 1)
 			return 1;
 
-	vector->arr[vector->size - 1] = val;
+	vect->arr[vect->size - 1] = val;
 	return 0;
 }
 
-void vector_delete(vector * vector, size_t pos) {
-	vector->size = vector->size - 1;
+void vector_delet(container * cont, size_t pos) {
+	vector * vect = (vector *)(cont + 1);
 
-	for (int i = pos; i < vector->size; i++) 
-		vector->arr[i] = vector->arr[i + 1];
+	vect->size = vect->size - 1;
+
+	for (int i = pos; i < vect->size; i++) 
+		vect->arr[i] = vect->arr[i + 1];
 }
 
-int vector_swap(vector * vector, size_t pos1, size_t pos2) {
-	if ((pos1 > vector->size) || (pos2 > vector->size))
+int vector_swap(container * cont, size_t pos1, size_t pos2) {
+	vector * vect = (vector *)(cont + 1);
+	
+	if ((pos1 > vect->size) || (pos2 > vect->size))
 		return 1;
 
-	int swp = vector->arr[pos1];
-	vector->arr[pos1] = vector->arr[pos2];
-	vector->arr[pos2] = swp;
+	int swp = vect->arr[pos1];
+	vect->arr[pos1] = vect->arr[pos2];
+	vect->arr[pos2] = swp;
 	return 0;
 }
 
-size_t vector_get_size(vector * vector) {
-	size_t size = vector->size;
+size_t vector_get_size(container * cont) {
+	vector * vect = (vector *)(cont + 1);
+
+	size_t size = vect->size;
 	return size;
 }
 
-data vector_get_val(vector * vector, size_t i, int * flag) {
-	if (i > vector->size) {
+data vector_get_val(container * cont, size_t i, int * flag) {
+	vector * vect = (vector *)(cont + 1);
+	
+	if (i > vect->size) {
 		* flag = 1;
 		return 0;
 	}
 
 	* flag = 0;
-	return vector->arr[i];
-};
-
-int vector_set_val(vector * vector, size_t i, int val) {
-	if (i > vector->size)
-		return 1;
-	
-	vector->arr[i] = val;
-	return 0;
-};
-
-
-vector * vector_generate() {
-	int capacity = rand() % 100 + 1;
-	vector * vector = malloc(sizeof(vector));
-	
-	if (vector == NULL)
-		return NULL;
-
-	data * arr = malloc(sizeof(data) * capacity);
-
-	if (arr == NULL) {
-		free(vector);
-		return NULL;
-	}
-
-	vector->capacity = capacity;
-	vector->size = capacity;
-	vector->arr = arr;
-	
-	for (int i = 0; i < vector->size; i++) {
-		vector->arr[i] = rand() % 1000 + 1;
-	}
-
-	return vector;
+	return vect->arr[i];
 }
 
-vector * vector_generate_size(size_t capacity) {
-	vector * vector = malloc(sizeof(vector));
+int vector_set_val(container * cont, size_t i, int val) {
+	vector * vect = (vector *)(cont + 1);
+	
+	if (i > vect->size)
+		return 1;
+	
+	vect->arr[i] = val;
+	return 0;
+}
 
-	if (vector == NULL)
+container * vector_generate(size_t capacity) {
+	container * cont = malloc(sizeof(container) + sizeof(vector));
+
+	if (cont == NULL)
 		return NULL;
+	
+	cont->m = malloc(sizeof(table));
 
-	data * arr = malloc(sizeof(data) * capacity);
-
-	if (arr == NULL) {
-		free(vector);
+	if (cont->m == NULL) {
+		free(cont);
 		return NULL;
 	}
 
-	vector->capacity = capacity;
-	vector->size = capacity;
-	vector->arr = arr;
-	
-	for (int i = 0; i < vector->size; i++) {
-		vector->arr[i] = rand() % 1000 + 1;
+	vector * vect = (vector *)(cont + 1);
+
+	vect->arr = malloc(sizeof(data) * capacity);
+
+	if (vect->arr == NULL) {
+		free(cont->m);
+		free(cont);
+		return NULL;
 	}
 	
-	return vector;
+	cont->m->destroy = &vector_destroy;
+	cont->m->print = &vector_print;
+	cont->m->push = &vector_push;
+	cont->m->delet = &vector_delet;
+	cont->m->swap = &vector_swap;
+	cont->m->get_size = &vector_get_size;
+	cont->m->get_val = &vector_get_val;
+	cont->m->set_val = &vector_set_val;
+	vect->capacity = capacity;
+	vect->size = capacity;
+	
+	for (int i = 0; i < vect->size; i++) {
+		vect->arr[i] = rand() % 1000 + 1;
+	}
+	
+	return cont;
 }
